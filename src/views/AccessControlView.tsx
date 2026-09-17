@@ -77,6 +77,16 @@ export const AccessControlView: React.FC = () => {
   const [newUserTeam, setNewUserTeam] = useState('Enterprise Sales');
   const [newUserRoleId, setNewUserRoleId] = useState(roles[0]?.id || 'role-sales-rep');
 
+  // Edit User Modal
+  const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
+  const [editUserTitle, setEditUserTitle] = useState('');
+  const [editUserDept, setEditUserDept] = useState('');
+  const [editUserTeam, setEditUserTeam] = useState('');
+  const [editUserRoleId, setEditUserRoleId] = useState('');
+  const [editUserIsActive, setEditUserIsActive] = useState(true);
+
   // Password Reset Modal
   const [resetPasswordUser, setResetPasswordUser] = useState<UserAccount | null>(null);
   const [resetPasswordValue, setResetPasswordValue] = useState('mesob123');
@@ -226,6 +236,32 @@ export const AccessControlView: React.FC = () => {
       setResetPasswordSuccess(false);
       setResetPasswordValue('mesob123');
     }, 1200);
+  };
+
+  const handleOpenEditUser = (u: UserAccount) => {
+    setEditingUser(u);
+    setEditUserName(u.name);
+    setEditUserEmail(u.email);
+    setEditUserTitle(u.title);
+    setEditUserDept(u.department);
+    setEditUserTeam(u.team);
+    setEditUserRoleId(u.roleId);
+    setEditUserIsActive(u.isActive);
+  };
+
+  const handleSaveEditUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser || !editUserName || !editUserEmail) return;
+    updateUser(editingUser.id, {
+      name: editUserName,
+      email: editUserEmail,
+      title: editUserTitle,
+      department: editUserDept,
+      team: editUserTeam,
+      roleId: editUserRoleId,
+      isActive: editUserIsActive
+    });
+    setEditingUser(null);
   };
 
   return (
@@ -631,6 +667,13 @@ export const AccessControlView: React.FC = () => {
                             }`}
                           >
                             {isCurrent ? 'Active Persona' : 'Switch to Persona'}
+                          </button>
+                          <button
+                            onClick={() => handleOpenEditUser(u)}
+                            className="p-1.5 rounded-lg bg-slate-900 hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/30 transition-colors"
+                            title="Edit User Profile"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => {
@@ -1129,6 +1172,117 @@ export const AccessControlView: React.FC = () => {
               className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold"
             >
               Save New Password
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Edit User Profile */}
+      <Modal
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        title="Edit User Profile"
+        subtitle={editingUser ? `Update profile, role assignment, and organization details for ${editingUser.name}` : ''}
+      >
+        <form onSubmit={handleSaveEditUser} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Almaz Tadesse"
+                value={editUserName}
+                onChange={e => setEditUserName(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                placeholder="e.g. almaz.tadesse@mesob.et"
+                value={editUserEmail}
+                onChange={e => setEditUserEmail(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Job Title</label>
+              <input
+                type="text"
+                placeholder="e.g. Account Executive"
+                value={editUserTitle}
+                onChange={e => setEditUserTitle(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Assigned Role</label>
+              <select
+                value={editUserRoleId}
+                onChange={e => setEditUserRoleId(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-semibold"
+              >
+                {roles.map(r => (
+                  <option key={r.id} value={r.id}>
+                    {r.name} ({r.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Department</label>
+              <input
+                type="text"
+                value={editUserDept}
+                onChange={e => setEditUserDept(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Team / Tribe</label>
+              <input
+                type="text"
+                value={editUserTeam}
+                onChange={e => setEditUserTeam(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Account Status</label>
+            <select
+              value={editUserIsActive ? 'active' : 'inactive'}
+              onChange={e => setEditUserIsActive(e.target.value === 'active')}
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-semibold"
+            >
+              <option value="active">Active (Access Enabled)</option>
+              <option value="inactive">Inactive (Access Suspended)</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={() => setEditingUser(null)}
+              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-glow-brand"
+            >
+              Save Changes
             </button>
           </div>
         </form>

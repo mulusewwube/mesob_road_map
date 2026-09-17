@@ -17,7 +17,9 @@ import {
   Shield,
   ShieldCheck,
   Lock,
-  LogOut
+  LogOut,
+  Edit2,
+  User
 } from 'lucide-react';
 import { Modal } from '../common/Modal';
 
@@ -45,12 +47,42 @@ export const Header: React.FC = () => {
     users,
     roles,
     setCurrentUserId,
+    updateUser,
     hasPermission,
     logout
   } = useApp();
 
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isPersonaOpen, setIsPersonaOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileTitle, setProfileTitle] = useState('');
+  const [profileDept, setProfileDept] = useState('');
+  const [profileTeam, setProfileTeam] = useState('');
+
+  const handleOpenEditProfile = () => {
+    setProfileName(currentUser.name);
+    setProfileEmail(currentUser.email);
+    setProfileTitle(currentUser.title);
+    setProfileDept(currentUser.department);
+    setProfileTeam(currentUser.team);
+    setIsPersonaOpen(false);
+    setIsEditProfileOpen(true);
+  };
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileName || !profileEmail) return;
+    updateUser(currentUser.id, {
+      name: profileName,
+      email: profileEmail,
+      title: profileTitle,
+      department: profileDept,
+      team: profileTeam
+    });
+    setIsEditProfileOpen(false);
+  };
   const [quickAddType, setQuickAddType] = useState<
     'task' | 'feature' | 'lead' | 'campaign' | 'feedback' | null
   >(null);
@@ -554,6 +586,14 @@ export const Header: React.FC = () => {
                   {/* Persona Actions */}
                   <div className="pt-2 mt-1 border-t border-slate-800 px-2 space-y-1.5">
                     <button
+                      onClick={handleOpenEditProfile}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-200 hover:text-white transition-all"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Edit My Profile</span>
+                    </button>
+
+                    <button
                       onClick={() => {
                         setActiveView('access-control');
                         setIsPersonaOpen(false);
@@ -903,6 +943,91 @@ export const Header: React.FC = () => {
               className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg transition-colors"
             >
               Log Feedback
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Edit My Profile */}
+      <Modal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        title="Edit Profile"
+        subtitle={`Update your account information (${currentUser.email})`}
+      >
+        <form onSubmit={handleSaveProfile} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+              <input
+                type="text"
+                required
+                value={profileName}
+                onChange={e => setProfileName(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Work Email</label>
+              <input
+                type="email"
+                required
+                value={profileEmail}
+                onChange={e => setProfileEmail(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">Job Title</label>
+            <input
+              type="text"
+              value={profileTitle}
+              onChange={e => setProfileTitle(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Department</label>
+              <input
+                type="text"
+                value={profileDept}
+                onChange={e => setProfileDept(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Team / Tribe</label>
+              <input
+                type="text"
+                value={profileTeam}
+                onChange={e => setProfileTeam(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+            <span>Assigned RBAC Role:</span>
+            <span className="font-mono text-emerald-400 font-bold">{currentRole.name} ({currentRole.code})</span>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(false)}
+              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-glow-brand"
+            >
+              Save Profile
             </button>
           </div>
         </form>
