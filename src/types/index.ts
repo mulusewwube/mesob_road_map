@@ -508,6 +508,7 @@ export interface UserAccount {
   id: string;
   name: string;
   email: string;
+  password?: string;
   avatarUrl?: string;
   roleId: string;
   department: string;
@@ -515,4 +516,15 @@ export interface UserAccount {
   title: string;
   isActive: boolean;
   createdAt: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password?: string;
+}
+
+export interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: UserAccount;
 }

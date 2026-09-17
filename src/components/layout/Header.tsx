@@ -16,7 +16,8 @@ import {
   Moon,
   Shield,
   ShieldCheck,
-  Lock
+  Lock,
+  LogOut
 } from 'lucide-react';
 import { Modal } from '../common/Modal';
 
@@ -44,7 +45,8 @@ export const Header: React.FC = () => {
     users,
     roles,
     setCurrentUserId,
-    hasPermission
+    hasPermission,
+    logout
   } = useApp();
 
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
@@ -549,8 +551,8 @@ export const Header: React.FC = () => {
                     })}
                   </div>
 
-                  {/* RBAC Admin Link */}
-                  <div className="pt-2 mt-1 border-t border-slate-800 px-2">
+                  {/* Persona Actions */}
+                  <div className="pt-2 mt-1 border-t border-slate-800 px-2 space-y-1.5">
                     <button
                       onClick={() => {
                         setActiveView('access-control');
@@ -559,7 +561,18 @@ export const Header: React.FC = () => {
                       className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-emerald-400 transition-all"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>Manage Roles & Permissions Matrix</span>
+                      <span>Manage Roles & Permissions</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsPersonaOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-300 hover:text-rose-200 transition-all"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Sign Out / Lock Session</span>
                     </button>
                   </div>
                 </div>

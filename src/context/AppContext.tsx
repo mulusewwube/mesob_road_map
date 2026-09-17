@@ -29,7 +29,9 @@ import {
   ModuleKey,
   PermissionAction,
   RecordScope,
-  ModulePermission
+  ModulePermission,
+  AuthResult,
+  LoginCredentials
 } from '../types';
 import {
   INITIAL_PRODUCTS,
@@ -224,6 +226,12 @@ interface AppContextType {
   updateActionItem: (id: string, updates: Partial<ActionRequiredItem>) => void;
   deleteActionItem: (id: string) => void;
 
+  // Authentication & Session
+  isAuthenticated: boolean;
+  login: (email: string, password?: string) => AuthResult;
+  logout: () => void;
+  changeUserPassword: (userId: string, newPassword: string) => boolean;
+
   // RBAC & User Management
   currentUser: UserAccount;
   currentRole: UserRole;
@@ -256,8 +264,18 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'mesob_pms_data_v2';
 const LOCAL_STORAGE_ACTIVE_USER_KEY = 'mesob_active_user';
+const LOCAL_STORAGE_AUTH_KEY = 'mesob_auth_session';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_AUTH_KEY);
+      if (saved !== null) return saved === 'true';
+      return true;
+    } catch {
+      return true;
+    }
+  });
   const [theme, setTheme] = useState<ThemeMode>(() => {
     try {
       const saved = localStorage.getItem('mesob_theme');
@@ -1136,6 +1154,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  // Authentication methods
+  const login = (email: string, password?: string): AuthResult => {
+    const cleanEmail = email.trim().toLowerCase();
+    const user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+    if (!user) {
+      return { success: false, error: 'No user account found matching this email address.' };
+    }
+
+    if (!user.isActive) {
+      return { success: false, error: 'This user account has been deactivated. Please contact your system administrator.' };
+    }
+
+    // Check password
+    if (password !== undefined && password !== '') {
+      const expectedPassword = user.password || 'mesob123';
+      if (password !== expectedPassword) {
+        return { success: false, error: 'Incorrect password. Please verify your credentials and try again.' };
+      }
+    }
+
+    setCurrentUserId(user.id);
+    setIsAuthenticated(true);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, 'true');
+    } catch (e) {
+      console.warn('Could not save auth session', e);
+    }
+    return { success: true, user };
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, 'false');
+    } catch (e) {
+      console.warn('Could not clear auth session', e);
+    }
+  };
+
+  const changeUserPassword = (userId: string, newPassword: string): boolean => {
+    setUsers(prev => {
+      const next = prev.map(u => (u.id === userId ? { ...u, password: newPassword } : u));
+      saveToStorage({ users: next });
+      return next;
+    });
+    return true;
+  };
+
   const deleteUser = (id: string) => {
     setUsers(prev => {
       if (prev.length <= 1) return prev;
@@ -1306,6 +1373,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         formatMoney,
         formatCompactMoney,
         convertMoney,
+        // Authentication & Session
+        isAuthenticated,
+        login,
+        logout,
+        changeUserPassword,
         // RBAC Context
         currentUser,
         currentRole,

@@ -23,10 +23,16 @@ import { CrossLinkView } from './views/CrossLinkView';
 import { ReportsView } from './views/ReportsView';
 import { SettingsView } from './views/SettingsView';
 import { AccessControlView } from './views/AccessControlView';
+import { LoginView } from './views/LoginView';
 import { UnauthorizedState } from './components/common/PermissionGate';
 
 const MainContent: React.FC = () => {
-  const { activeView, hasPermission } = useApp();
+  const { activeView, hasPermission, isAuthenticated } = useApp();
+
+  // Route Guard: Show Login Portal if session is unauthenticated
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
 
   const renderView = () => {
     // Top-level RBAC Route Guard: If role cannot view this module, render Unauthorized state

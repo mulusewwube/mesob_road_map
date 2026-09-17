@@ -23,6 +23,8 @@ import {
   Lock,
   Unlock,
   Eye,
+  EyeOff,
+  Key,
   Sliders,
   Sparkles,
   UserCheck,
@@ -48,6 +50,7 @@ export const AccessControlView: React.FC = () => {
     addUser,
     updateUser,
     deleteUser,
+    changeUserPassword,
     hasPermission,
     canAccessRecord
   } = useApp();
@@ -66,10 +69,19 @@ export const AccessControlView: React.FC = () => {
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('mesob123');
+  const [newUserConfirmPassword, setNewUserConfirmPassword] = useState('mesob123');
+  const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [newUserTitle, setNewUserTitle] = useState('');
   const [newUserDept, setNewUserDept] = useState('Commercial & Sales');
   const [newUserTeam, setNewUserTeam] = useState('Enterprise Sales');
   const [newUserRoleId, setNewUserRoleId] = useState(roles[0]?.id || 'role-sales-rep');
+
+  // Password Reset Modal
+  const [resetPasswordUser, setResetPasswordUser] = useState<UserAccount | null>(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('mesob123');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
 
   // Simulator State
   const [simUserId, setSimUserId] = useState<string>(users[0]?.id || 'user-admin');
@@ -156,6 +168,8 @@ export const AccessControlView: React.FC = () => {
     updateRole(activeSelectedRole.id, { permissions: currentPerms });
   };
 
+  const [passwordError, setPasswordError] = useState('');
+
   const handleCreateRole = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoleName) return;
@@ -179,9 +193,14 @@ export const AccessControlView: React.FC = () => {
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName || !newUserEmail) return;
+    if (newUserPassword && newUserPassword !== newUserConfirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
     addUser({
       name: newUserName,
       email: newUserEmail,
+      password: newUserPassword || 'mesob123',
       title: newUserTitle || 'Team Member',
       department: newUserDept,
       team: newUserTeam,
@@ -191,7 +210,22 @@ export const AccessControlView: React.FC = () => {
     setNewUserName('');
     setNewUserEmail('');
     setNewUserTitle('');
+    setNewUserPassword('mesob123');
+    setNewUserConfirmPassword('mesob123');
+    setPasswordError('');
     setIsNewUserModalOpen(false);
+  };
+
+  const handleResetPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPasswordUser || !resetPasswordValue) return;
+    changeUserPassword(resetPasswordUser.id, resetPasswordValue);
+    setResetPasswordSuccess(true);
+    setTimeout(() => {
+      setResetPasswordUser(null);
+      setResetPasswordSuccess(false);
+      setResetPasswordValue('mesob123');
+    }, 1200);
   };
 
   return (
@@ -585,7 +619,7 @@ export const AccessControlView: React.FC = () => {
                         </button>
                       </td>
 
-                      {/* Switch Persona Trigger & Delete */}
+                      {/* Switch Persona Trigger, Reset Password & Delete */}
                       <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -597,6 +631,17 @@ export const AccessControlView: React.FC = () => {
                             }`}
                           >
                             {isCurrent ? 'Active Persona' : 'Switch to Persona'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setResetPasswordUser(u);
+                              setResetPasswordValue('mesob123');
+                              setResetPasswordSuccess(false);
+                            }}
+                            className="p-1.5 rounded-lg bg-slate-900 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-slate-800 hover:border-amber-500/30 transition-colors"
+                            title="Reset User Password"
+                          >
+                            <Key className="w-3.5 h-3.5" />
                           </button>
                           {users.length > 1 && (
                             <button
@@ -902,6 +947,70 @@ export const AccessControlView: React.FC = () => {
             </div>
           </div>
 
+          {/* Password & Authentication Credentials */}
+          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-emerald-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5" /> Login Credentials & Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowNewUserPassword(!showNewUserPassword)}
+                className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 font-mono"
+              >
+                {showNewUserPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span>{showNewUserPassword ? 'Hide' : 'Show'} Password</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Initial Password <span className="text-emerald-400">*</span>
+                </label>
+                <input
+                  type={showNewUserPassword ? 'text' : 'password'}
+                  required
+                  placeholder="e.g. mesob123"
+                  value={newUserPassword}
+                  onChange={e => {
+                    setNewUserPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Confirm Password <span className="text-emerald-400">*</span>
+                </label>
+                <input
+                  type={showNewUserPassword ? 'text' : 'password'}
+                  required
+                  placeholder="Repeat password"
+                  value={newUserConfirmPassword}
+                  onChange={e => {
+                    setNewUserConfirmPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+            </div>
+
+            {passwordError && (
+              <div className="text-xs text-rose-400 flex items-center gap-1.5 font-medium bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
+            <p className="text-[11px] text-slate-500">
+              Default demo password: <code className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded">mesob123</code>. The user can sign into the portal using their email and this password.
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">Job Title</label>
@@ -963,6 +1072,63 @@ export const AccessControlView: React.FC = () => {
               className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-glow-brand"
             >
               Save User Account
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal: Reset Password */}
+      <Modal
+        isOpen={!!resetPasswordUser}
+        onClose={() => setResetPasswordUser(null)}
+        title="Reset User Password"
+        subtitle={resetPasswordUser ? `Update credentials for ${resetPasswordUser.name} (${resetPasswordUser.email})` : ''}
+      >
+        <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">New Password</label>
+            <div className="relative">
+              <input
+                type={showResetPassword ? 'text' : 'password'}
+                required
+                value={resetPasswordValue}
+                onChange={e => setResetPasswordValue(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(!showResetPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+              >
+                {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1">
+              Minimum 6 characters recommended. The user will use this new password immediately upon next login.
+            </p>
+          </div>
+
+          {resetPasswordSuccess && (
+            <div className="p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Password updated successfully!</span>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={() => setResetPasswordUser(null)}
+              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold"
+            >
+              Save New Password
             </button>
           </div>
         </form>
