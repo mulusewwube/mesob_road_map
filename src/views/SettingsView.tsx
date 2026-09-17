@@ -12,7 +12,8 @@ import {
   Sparkles,
   Info,
   Sun,
-  Moon
+  Moon,
+  Trash2
 } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
@@ -23,6 +24,7 @@ export const SettingsView: React.FC = () => {
     setCurrency,
     exchangeRateETBtoUSD,
     resetAllData,
+    clearAllDataToBlank,
     products,
     features,
     devTasks,
@@ -33,12 +35,21 @@ export const SettingsView: React.FC = () => {
   } = useApp();
 
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [wipeSuccess, setWipeSuccess] = useState(false);
 
   const handleReset = () => {
     if (window.confirm('Reset all lifecycle data back to the default system baseline dataset?')) {
       resetAllData();
       setResetSuccess(true);
       setTimeout(() => setResetSuccess(false), 3000);
+    }
+  };
+
+  const handleWipeData = () => {
+    if (window.confirm('Wipe ALL sample/mock data to start with a 100% clean production slate? This will set all products, epics, tasks, leads, and campaigns to empty.')) {
+      clearAllDataToBlank();
+      setWipeSuccess(true);
+      setTimeout(() => setWipeSuccess(false), 3000);
     }
   };
 
@@ -61,7 +72,14 @@ export const SettingsView: React.FC = () => {
       {resetSuccess && (
         <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          Successfully restored all lifecycle data to default Mesob dataset.
+          Successfully restored all lifecycle data to baseline dataset.
+        </div>
+      )}
+
+      {wipeSuccess && (
+        <div className="p-4 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 text-rose-400" />
+          All mock data cleared. Workspace is in 100% clean production mode.
         </div>
       )}
 
@@ -190,23 +208,23 @@ export const SettingsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Data Reset */}
-      <div className="glass-panel rounded-2xl p-6 border border-rose-500/30 space-y-4">
-        <div className="flex items-center justify-between">
+      {/* Data Wipe & Production Management */}
+      <div className="glass-panel rounded-2xl p-6 border border-rose-500/40 bg-gradient-to-r from-slate-900 via-rose-950/10 to-slate-900 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-sm font-bold text-white font-display flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-rose-400" /> Reset to System Baseline Dataset
+              <Trash2 className="w-4 h-4 text-rose-400" /> Wipe All Mock Data (Start Fresh Production)
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Clear your custom local modifications and restore the complete initial enterprise dataset.
+              Clear all sample products, roadmaps, development tasks, leads, and revenue entries to begin with a completely clean database.
             </p>
           </div>
 
           <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs rounded-xl border border-rose-500/40 transition-all flex items-center gap-1.5"
+            onClick={handleWipeData}
+            className="px-4 py-2 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold text-xs rounded-xl border border-rose-500/40 transition-all flex items-center gap-1.5 shrink-0"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset All Data
+            <Trash2 className="w-3.5 h-3.5" /> Wipe Mock Data
           </button>
         </div>
       </div>

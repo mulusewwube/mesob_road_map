@@ -80,20 +80,20 @@ export const RevenueView: React.FC = () => {
   const [revChurnMrr, setRevChurnMrr] = useState(5000);
 
   const currentMonth = revenueHistory[revenueHistory.length - 1];
-  const mrr = currentMonth?.mrrETB || (customers.reduce((acc, c) => acc + c.mrrETB, 0)) || 874166;
+  const mrr = currentMonth?.mrrETB || (customers.reduce((acc, c) => acc + c.mrrETB, 0)) || 0;
   const arr = currentMonth?.arrETB || mrr * 12;
-  const newMrr = currentMonth?.newMrrETB || 78000;
-  const expansionMrr = currentMonth?.expansionMrrETB || 45000;
-  const churnedMrr = currentMonth?.churnedMrrETB || 5000;
+  const newMrr = currentMonth?.newMrrETB || 0;
+  const expansionMrr = currentMonth?.expansionMrrETB || 0;
+  const churnedMrr = currentMonth?.churnedMrrETB || 0;
   const netNewMrr = newMrr + expansionMrr - churnedMrr;
 
-  const arpu = currentMonth?.arpuETB || (customers.length > 0 ? Math.round(mrr / customers.length) : 2081);
-  const cac = currentMonth?.cacETB || 1550;
-  const ltv = currentMonth?.ltvETB || 49500;
+  const arpu = currentMonth?.arpuETB || (customers.length > 0 ? Math.round(mrr / customers.length) : 0);
+  const cac = currentMonth?.cacETB || 0;
+  const ltv = currentMonth?.ltvETB || 0;
   const ltvCacRatio = cac > 0 ? (ltv / cac).toFixed(1) : '0.0';
-  const churnRate = currentMonth?.churnRatePercent || 0.7;
-  const retentionRate = currentMonth?.retentionRatePercent || 99.3;
-  const grossMargin = currentMonth?.grossMarginPercent || 81.2;
+  const churnRate = currentMonth?.churnRatePercent || 0;
+  const retentionRate = currentMonth?.retentionRatePercent || (customers.length > 0 ? 100 : 0);
+  const grossMargin = currentMonth?.grossMarginPercent || 0;
 
   // Product revenue breakdown data
   const productRevData = products.map(p => ({

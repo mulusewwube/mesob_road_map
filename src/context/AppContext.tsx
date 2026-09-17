@@ -262,7 +262,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'mesob_pms_data_v2';
+const LOCAL_STORAGE_KEY = 'mesob_pms_prod_v3';
 const LOCAL_STORAGE_ACTIVE_USER_KEY = 'mesob_active_user';
 const LOCAL_STORAGE_AUTH_KEY = 'mesob_auth_session';
 

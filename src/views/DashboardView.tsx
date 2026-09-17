@@ -23,7 +23,8 @@ import {
   Activity,
   Plus,
   Edit2,
-  Trash2
+  Trash2,
+  Target
 } from 'lucide-react';
 import {
   AreaChart,
@@ -88,14 +89,14 @@ export const DashboardView: React.FC = () => {
   const targetARR = 15000000;
 
   // Blended calculations
-  const conversionRate = totalLeads > 0 ? Number(((totalCustomers / totalLeads) * 100).toFixed(1)) : 8.2;
-  const customerRetention = 99.3;
-  const churnRate = 0.7;
-  const productAdoption = 72.4;
-  const devProgress = devTasks.length > 0 ? Math.round((devTasks.filter(t => t.status === 'RELEASED').length / devTasks.length) * 100) : 85;
+  const conversionRate = totalLeads > 0 ? Number(((totalCustomers / totalLeads) * 100).toFixed(1)) : 0;
+  const customerRetention = totalCustomers > 0 ? 99.3 : 0;
+  const churnRate = totalCustomers > 0 ? 0.7 : 0;
+  const productAdoption = totalProducts > 0 ? 72.4 : 0;
+  const devProgress = devTasks.length > 0 ? Math.round((devTasks.filter(t => t.status === 'RELEASED').length / devTasks.length) * 100) : 0;
   const totalCampBudget = campaigns.reduce((acc, c) => acc + c.budgetETB, 0);
   const totalCampRev = campaigns.reduce((acc, c) => acc + c.actualRevenueETB, 0);
-  const marketingROI = totalCampBudget > 0 ? Number((totalCampRev / totalCampBudget).toFixed(1)) : 3.6;
+  const marketingROI = totalCampBudget > 0 ? Number((totalCampRev / totalCampBudget).toFixed(1)) : 0;
 
   // Chart data for MRR
   const mrrChartData = revenueHistory.length > 0
@@ -106,7 +107,7 @@ export const DashboardView: React.FC = () => {
         newMrr: convertMoney(r.newMrrETB)
       }))
     : [
-        { month: 'Oct', mrr: convertMoney(currentMRR), target: convertMoney(1000000), newMrr: convertMoney(78000) }
+        { month: 'Run-Rate', mrr: convertMoney(currentMRR), target: convertMoney(1000000), newMrr: 0 }
       ];
 
   // Chart data for Feature Impact
@@ -225,6 +226,46 @@ export const DashboardView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Clean Production State Welcome Banner */}
+      {products.length === 0 && (
+        <div className="glass-panel p-6 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-slate-900 via-emerald-950/20 to-slate-900 space-y-4 animate-fade-in shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" /> Ready for Live Production Data
+              </div>
+              <h2 className="text-lg font-bold text-white">Your Workspace is Clean & Initialized</h2>
+              <p className="text-xs text-slate-400 max-w-xl">
+                All sample/mock data has been removed. You are operating in clean production mode. Start by adding your first product suite item, strategic objective, or sales lead.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                onClick={() => setActiveView('products')}
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all shadow-glow-brand flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Create First Product</span>
+              </button>
+              <button
+                onClick={() => setActiveView('strategy')}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+              >
+                <Target className="w-3.5 h-3.5 text-amber-400" />
+                <span>Define Strategy</span>
+              </button>
+              <button
+                onClick={() => setActiveView('sales')}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5"
+              >
+                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Add Sales Deal</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 17 Key KPI Cards Grid */}
       <div className="space-y-2">
