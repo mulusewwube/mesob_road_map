@@ -1007,7 +1007,7 @@ export const AccessControlView: React.FC = () => {
             )}
 
             <p className="text-[11px] text-slate-500">
-              Default demo password: <code className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded">mesob123</code>. The user can sign into the portal using their email and this password.
+              Initial password for new account. The user will use their work email and this password to sign into the system.
             </p>
           </div>
 

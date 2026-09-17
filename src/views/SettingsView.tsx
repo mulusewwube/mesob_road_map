@@ -35,7 +35,7 @@ export const SettingsView: React.FC = () => {
   const [resetSuccess, setResetSuccess] = useState(false);
 
   const handleReset = () => {
-    if (window.confirm('Reset all demo data back to the default Mesob Hospitality SaaS Suite dataset?')) {
+    if (window.confirm('Reset all lifecycle data back to the default system baseline dataset?')) {
       resetAllData();
       setResetSuccess(true);
       setTimeout(() => setResetSuccess(false), 3000);
@@ -195,10 +195,10 @@ export const SettingsView: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm font-bold text-white font-display flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-rose-400" /> Reset to Default Mesob Demo Data
+              <RotateCcw className="w-4 h-4 text-rose-400" /> Reset to System Baseline Dataset
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Clear your custom local modifications and restore the complete initial Ethiopian hospitality dataset.
+              Clear your custom local modifications and restore the complete initial enterprise dataset.
             </p>
           </div>
 
